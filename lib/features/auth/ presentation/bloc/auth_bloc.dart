@@ -8,12 +8,22 @@ import 'auth_state.dart';
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final AuthRepository repo;
   final AuthLocalStorage localStorage;
+  
+  // 🧪 TEST MODE - Set to true to skip API calls
+  static const bool testMode = true;
 
   AuthBloc(this.repo, this.localStorage) : super(AuthInitial()) {
     // 🔹 Send OTP
     on<SendOtpEvent>((event, emit) async {
       emit(AuthLoading());
       try {
+        if (testMode) {
+          // Skip API call in test mode
+          print('🧪 TEST MODE: Skipping OTP send');
+          await Future.delayed(const Duration(milliseconds: 500));
+          emit(OtpSent());
+          return;
+        }
         await repo.sendOtp(event.email, event.action);
         emit(OtpSent());
       } catch (e) {
@@ -43,6 +53,24 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<LoginEvent>((event, emit) async {
       emit(AuthLoading());
       try {
+        if (testMode) {
+          // Skip API call in test mode
+          print('🧪 TEST MODE: Skipping login API');
+          await Future.delayed(const Duration(milliseconds: 500));
+          
+          final mockUser = UserEntity(
+            id: 'test-user-123',
+            email: event.email,
+            name: 'Test User',
+            accessToken: 'mock-token-${DateTime.now().millisecondsSinceEpoch}',
+            refreshToken: 'mock-refresh-token',
+          );
+          
+          await localStorage.saveToken(mockUser.accessToken);
+          emit(AuthSuccess(mockUser));
+          return;
+        }
+        
         final user = await repo.login(event.email, event.otp);
         await localStorage.saveToken(user.accessToken);
         emit(AuthSuccess(user));
@@ -55,6 +83,24 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<RegisterEvent>((event, emit) async {
       emit(AuthLoading());
       try {
+        if (testMode) {
+          // Skip API call in test mode
+          print('🧪 TEST MODE: Skipping register API');
+          await Future.delayed(const Duration(milliseconds: 500));
+          
+          final mockUser = UserEntity(
+            id: 'test-user-${DateTime.now().millisecondsSinceEpoch}',
+            email: event.email,
+            name: event.name,
+            accessToken: 'mock-token-${DateTime.now().millisecondsSinceEpoch}',
+            refreshToken: 'mock-refresh-token',
+          );
+          
+          await localStorage.saveToken(mockUser.accessToken);
+          emit(AuthSuccess(mockUser));
+          return;
+        }
+        
         final user = await repo.register(event.email, event.otp, event.name);
         await localStorage.saveToken(user.accessToken);
         emit(AuthSuccess(user));

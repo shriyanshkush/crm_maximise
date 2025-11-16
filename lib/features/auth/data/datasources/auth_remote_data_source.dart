@@ -66,19 +66,34 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       );
 
       print('📨 Login Response: ${response.data}');
+      print('📨 Response Status: ${response.statusCode}');
 
-      if (response.statusCode == 200 && response.data['success'] == true) {
+      final data = response.data;
+
+      // ✅ Validate structure first
+      if (data is Map<String, dynamic> &&
+          data['success'] == true &&
+          data.containsKey('user')) {
         print('✅ Login successful');
-        return UserModel.fromJson(response.data);
+        return UserModel.fromJson(data);
       } else {
-        throw Exception(response.data['message'] ?? 'Login failed');
+        final message = data['message'] ?? 'Login failed';
+        print('❌ Login failed: $message');
+        throw Exception(message);
       }
     } on DioException catch (e) {
-      print('❌ Dio Error (login): ${e.response?.data ?? e.message}');
-      rethrow;
+      print('❌ Dio Error (login):');
+      print('   Status: ${e.response?.statusCode}');
+      print('   Data: ${e.response?.data}');
+      print('   Message: ${e.message}');
+      
+      final msg = e.response?.data is Map
+          ? e.response?.data['message']
+          : e.message;
+      throw Exception(msg ?? 'Login failed');
     } catch (e) {
       print('❌ General Error (login): $e');
-      rethrow;
+      throw Exception('Login failed: $e');
     }
   }
 
@@ -101,6 +116,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       );
 
       print('📨 Register Response: ${response.data}');
+      print('📨 Response Status: ${response.statusCode}');
 
       final data = response.data;
 
@@ -116,11 +132,15 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         throw Exception(message);
       }
     } on DioException catch (e) {
+      print('❌ Dio Error (register):');
+      print('   Status: ${e.response?.statusCode}');
+      print('   Data: ${e.response?.data}');
+      print('   Message: ${e.message}');
+      
       final msg = e.response?.data is Map
           ? e.response?.data['message']
           : e.message;
-      print('❌ Dio Error (register): $msg');
-      rethrow;
+      throw Exception(msg ?? 'Registration failed');
     } catch (e) {
       print('❌ General Error (register): $e');
       rethrow;

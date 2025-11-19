@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'core/constants/app_routes.dart';
 import 'features/auth/ presentation/pages/ login_page.dart';
+import 'features/auth/ presentation/pages/onboarding_questionnaire.dart';
 import 'features/auth/ presentation/pages/otp_page.dart';
 import 'features/auth/ presentation/pages/splash_page.dart';
+import 'features/auth/ presentation/pages/welcome_screen.dart';
+import 'features/auth/domain/entities/user_entity.dart';
 import 'features/auth/services/auth_local_storage.dart';
 import 'features/dashboard/presentation/pages/dashboard_page.dart';
 import 'features/home/presentationpages/home_page.dart';
@@ -60,11 +63,38 @@ final GoRouter appRouter = GoRouter(
       },
     ),
 
+    // 🔹 Welcome Screen (After signup)
+    GoRoute(
+      path: '/welcome',
+      builder: (context, state) {
+        final name = state.extra as String? ?? '';
+        return WelcomeScreen(name: name);
+      },
+    ),
+
+    // 🔹 Onboarding Questionnaire
+    GoRoute(
+      path: '/onboarding/profile',
+      builder: (context, state) => const OnboardingQuestionnaire(),
+    ),
+
     // Home Page
     GoRoute(
       path: AppRoutes.home,
-      builder: (context, state) => const HomePage(),
+      builder: (context, state) {
+        final user = state.extra as UserEntity? ??
+            UserEntity(
+              id: '',
+              email: '',
+              name: '',
+              accessToken: '',
+              refreshToken: '',
+            ); // fallback safe
+        return HomePage(user: user);
+      },
     ),
+
+
 
     // 🔹 Dashboard
     // GoRoute(

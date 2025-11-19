@@ -1,15 +1,21 @@
 import 'package:dio/dio.dart';
+import '../../models/agent_performance_model.dart';
+import '../../models/campaign_model.dart';
 import '../../models/lead_quality_model.dart';
 import '../../models/lead_sources_model.dart';
 import '../../models/daily_generation_model.dart';
 import '../../models/integrations_status_model.dart';
+import '../../models/revenue_growth_model.dart';
 
 abstract class DashboardRemoteDataSource {
   Future<LeadQualityResponse> getLeadQuality();
   Future<LeadSourcesResponse> getLeadSources();
-  Future<DailyGenerationResponse> getDailyLeadGeneration(String view);
+  Future<LeadAnalysisResponse> getDailyLeadGeneration(String view);
   Future<IntegrationsStatusResponse> getIntegrationsStatus(String orgId);
   Future<Map<String, dynamic>> getTopPerformers();
+  Future<AgentPerformanceResponse> getAgentPerformance();
+  Future<CampaignResponse> getCampaignAnalytics();
+  Future<RevenueGrowthResponse> getRevenueGrowth(String period);
 }
 
 class DashboardRemoteDataSourceImpl implements DashboardRemoteDataSource {
@@ -41,14 +47,14 @@ class DashboardRemoteDataSourceImpl implements DashboardRemoteDataSource {
   }
 
   @override
-  Future<DailyGenerationResponse> getDailyLeadGeneration(String view) async {
+  Future<LeadAnalysisResponse> getDailyLeadGeneration(String view) async {
     try {
       final res = await dio.get(
         '/leads/api/analytics/daily-lead-generation',
         queryParameters: {'view': view},
       );
       print('📨 [daily-lead-generation] Response: ${res.data}');
-      return DailyGenerationResponse.fromJson(res.data);
+      return LeadAnalysisResponse.fromJson(res.data);
     } on DioException catch (e) {
       print('❌ [daily-lead-generation] DioError: ${e.response?.data ?? e.message}');
       rethrow;
@@ -63,7 +69,8 @@ class DashboardRemoteDataSourceImpl implements DashboardRemoteDataSource {
         queryParameters: {'organizationId': orgId},
       );
       print('📨 [integrations-status] Response: ${res.data}');
-      return IntegrationsStatusResponse.fromJson(res.data);
+      return IntegrationsStatusResponse.fromJson(res.data['data']);
+
     } on DioException catch (e) {
       print('❌ [integrations-status] DioError: ${e.response?.data ?? e.message}');
       rethrow;
@@ -81,4 +88,44 @@ class DashboardRemoteDataSourceImpl implements DashboardRemoteDataSource {
       rethrow;
     }
   }
+
+  @override
+  Future<AgentPerformanceResponse> getAgentPerformance() async {
+    try {
+      final res = await dio.get('/auth/api/dashboard/performance-by-user');
+      print('📨 [performance-by-user] Response: ${res.data}');
+      return AgentPerformanceResponse.fromJson(res.data);
+    } on DioException catch (e) {
+      print('❌ [performance-by-user] DioError: ${e.response?.data ?? e.message}');
+      rethrow;
+    }
+  }
+
+  @override
+  Future<CampaignResponse> getCampaignAnalytics() async {
+    try {
+      final res = await dio.get('/leads/api/analytics/campaigns');
+      print("📨 Campaign analytics => ${res.data}");
+      return CampaignResponse.fromJson(res.data);
+    } catch (e) {
+      print("❌ Error campaigns: $e");
+      rethrow;
+    }
+  }
+
+  @override
+  Future<RevenueGrowthResponse> getRevenueGrowth(String period) async {
+    try {
+      final res = await dio.get(
+        "/leads/api/analytics/revenue-growth",
+        queryParameters: {"period": period},
+      );
+      return RevenueGrowthResponse.fromJson(res.data);
+    } on DioException catch (e) {
+      print("❌ Revenue Growth API Error: ${e.response?.data}");
+      rethrow;
+    }
+  }
+
+
 }

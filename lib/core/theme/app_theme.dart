@@ -16,17 +16,17 @@ class AppTheme {
       useMaterial3: true,
       colorScheme: colorScheme,
       scaffoldBackgroundColor: colorScheme.background,
-      appBarTheme: AppBarTheme(
-        backgroundColor: colorScheme.primary,
-        foregroundColor: Colors.white,
-        elevation: 0,
-      ),
-      textTheme: TextTheme(
+
+      // DEFAULT BODY FONT → Gilroy
+      fontFamily: "Gilroy",
+
+      textTheme: const TextTheme(
         headlineLarge: AppTextStyles.headlineLarge,
         headlineMedium: AppTextStyles.headlineMedium,
         bodyLarge: AppTextStyles.bodyLarge,
         bodySmall: AppTextStyles.bodySmall,
       ),
+
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
@@ -37,13 +37,14 @@ class AppTheme {
           ),
         ),
       ),
+
       inputDecorationTheme: InputDecorationTheme(
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppColors.border),
         ),
-        focusedBorder: OutlineInputBorder(
-          borderSide: const BorderSide(color: AppColors.primary),
+        focusedBorder: const OutlineInputBorder(
+          borderSide: BorderSide(color: AppColors.primary),
         ),
       ),
     );
@@ -62,16 +63,16 @@ class AppTheme {
       useMaterial3: true,
       colorScheme: colorScheme,
       scaffoldBackgroundColor: colorScheme.background,
-      appBarTheme: const AppBarTheme(
-        backgroundColor: Color(0xFF1E1E1E),
-        foregroundColor: Colors.white,
+
+      fontFamily: "Gilroy",
+
+      textTheme: const TextTheme(
+        headlineLarge: AppTextStyles.headlineLarge,
+        headlineMedium: AppTextStyles.headlineMedium,
+        bodyLarge: AppTextStyles.bodyLarge,
+        bodySmall: AppTextStyles.bodySmall,
       ),
-      textTheme: TextTheme(
-        headlineLarge: AppTextStyles.headlineLarge.copyWith(color: Colors.white),
-        headlineMedium: AppTextStyles.headlineMedium.copyWith(color: Colors.white),
-        bodyLarge: AppTextStyles.bodyLarge.copyWith(color: Colors.white70),
-        bodySmall: AppTextStyles.bodySmall.copyWith(color: Colors.white54),
-      ),
+
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,

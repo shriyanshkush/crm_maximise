@@ -23,4 +23,13 @@ class LeadsRepositoryImpl implements LeadsRepository {
   @override
   Future<String> exportCsv({String? startDate, String? endDate, String? status, String? source}) =>
       remote.exportCsv(startDate: startDate, endDate: endDate, status: status, source: source);
+
+  @override
+  Future<LeadModel> getLeadById(String id) => remote.getLeadById(id);
+
+  @override
+  Future<Map<String, dynamic>> addNoteToLead(String id, String note) =>
+      remote.addNoteToLead(id, note);
+
+
 }

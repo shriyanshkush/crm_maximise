@@ -1,28 +1,46 @@
 class IntegrationItem {
   final String platform;
   final String status;
+  final bool isActive;
 
-  IntegrationItem({required this.platform, required this.status});
+  IntegrationItem({
+    required this.platform,
+    required this.status,
+    required this.isActive,
+  });
 
-  factory IntegrationItem.fromJson(Map<String, dynamic> json) => IntegrationItem(
-    platform: json['platform'] ?? '',
-    status: json['status'] ?? '',
-  );
+  factory IntegrationItem.fromJson(Map<String, dynamic> json) {
+    return IntegrationItem(
+      platform: json['platform'] ?? '',
+      status: json['status'] ?? '',
+      isActive: json['isActive'] ?? false,
+    );
+  }
 }
 
 class IntegrationsStatusResponse {
-  final Map<String, IntegrationItem> integrations;
+  final List<IntegrationItem> integrations;
 
   IntegrationsStatusResponse({required this.integrations});
 
   factory IntegrationsStatusResponse.fromJson(Map<String, dynamic> json) {
-    final data = json['data'] ?? {};
-    final items = <String, IntegrationItem>{};
-    if (data['integrations'] != null) {
-      (data['integrations'] as Map<String, dynamic>).forEach((key, value) {
-        items[key] = IntegrationItem.fromJson(value);
-      });
+    final integrationsMap = json['integrations'] as Map<String, dynamic>?;
+
+    if (integrationsMap == null) {
+      print("❌ integrations NULL from API");
+      return IntegrationsStatusResponse(integrations: []);
     }
-    return IntegrationsStatusResponse(integrations: items);
+
+    print("✅ integrations received: ${integrationsMap.length}");
+
+    return IntegrationsStatusResponse(
+      integrations: integrationsMap.values
+          .map((item) => IntegrationItem.fromJson(item))
+          .toList(),
+    );
   }
+
+  factory IntegrationsStatusResponse.empty() =>
+      IntegrationsStatusResponse(integrations: []);
+
 }

@@ -1,34 +1,47 @@
-class DailyDataItem {
-  final String period;
+class LeadAnalysisItem {
+  final String period;   // Fri, Sat OR 14:00 OR Jan
   final int count;
 
-  DailyDataItem({
+  LeadAnalysisItem({
     required this.period,
     required this.count,
   });
 
-  factory DailyDataItem.fromJson(Map<String, dynamic> json) => DailyDataItem(
-    period: json['period'] ?? '',
-    count: json['count'] ?? 0,
-  );
-}
-
-class DailyGenerationResponse {
-  final List<DailyDataItem> data;
-  final Map<String, dynamic> summary;
-
-  DailyGenerationResponse({
-    required this.data,
-    required this.summary,
-  });
-
-  factory DailyGenerationResponse.fromJson(Map<String, dynamic> json) {
-    final data = json['data'] ?? {};
-    return DailyGenerationResponse(
-      data: (data['data'] as List<dynamic>? ?? [])
-          .map((e) => DailyDataItem.fromJson(e))
-          .toList(),
-      summary: data['summary'] ?? {},
+  factory LeadAnalysisItem.fromJson(Map<String, dynamic> json) {
+    return LeadAnalysisItem(
+      period: json['period']?.toString() ?? '',
+      count: json['count'] ?? 0,
     );
   }
+}
+
+class LeadAnalysisResponse {
+  final List<LeadAnalysisItem> data;
+  final Map<String, dynamic> summary;
+  final String view;         // daily / weekly / monthly
+  final String periodUnit;   // hour / day / month
+
+  LeadAnalysisResponse({
+    required this.data,
+    required this.summary,
+    required this.view,
+    required this.periodUnit,
+  });
+
+  factory LeadAnalysisResponse.fromJson(Map<String, dynamic> json) {
+    final d = json['data'] ?? {};
+
+    return LeadAnalysisResponse(
+      data: (d['data'] as List? ?? [])
+          .map((e) => LeadAnalysisItem.fromJson(e))
+          .toList(),
+      summary: d['summary'] ?? {},
+      view: d['view'] ?? "weekly",
+      periodUnit: d['periodUnit'] ?? "",
+    );
+  }
+
+  factory LeadAnalysisResponse.empty() =>
+      LeadAnalysisResponse(data: [], summary: {}, view: '', periodUnit: '');
+
 }

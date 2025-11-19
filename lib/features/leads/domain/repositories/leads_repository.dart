@@ -31,4 +31,12 @@ abstract class LeadsRepository {
     String? status,
     String? source,
   });
+
+  /// ✅ Added for lead details
+  Future<LeadModel> getLeadById(String id);
+
+  /// ✅ Added for notes
+  Future<Map<String, dynamic>> addNoteToLead(String id, String note);
+
+
 }

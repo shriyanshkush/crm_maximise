@@ -3,21 +3,36 @@ class LeadQualityItem {
   final String displayName;
   final int count;
   final String color;
+  final double avgScore;
+  final double totalRevenue;
+  final double avgRevenue;
+  final int leadsWithRevenue;
 
   LeadQualityItem({
     required this.name,
     required this.displayName,
     required this.count,
     required this.color,
+    required this.avgScore,
+    required this.totalRevenue,
+    required this.avgRevenue,
+    required this.leadsWithRevenue,
   });
 
-  factory LeadQualityItem.fromJson(Map<String, dynamic> json) => LeadQualityItem(
-    name: json['name'] ?? '',
-    displayName: json['displayName'] ?? '',
-    count: json['count'] ?? 0,
-    color: json['color'] ?? '#000000',
-  );
+  factory LeadQualityItem.fromJson(Map<String, dynamic> json) {
+    return LeadQualityItem(
+      name: json['name'] ?? '',
+      displayName: json['displayName'] ?? '',
+      count: json['count'] ?? 0,
+      color: json['color'] ?? '#6c757d',
+      avgScore: (json['avgScore'] ?? 0).toDouble(),
+      totalRevenue: (json['totalRevenue'] ?? 0).toDouble(),
+      avgRevenue: (json['avgRevenue'] ?? 0).toDouble(),
+      leadsWithRevenue: json['leadsWithRevenue'] ?? 0,
+    );
+  }
 }
+
 
 class LeadQualityResponse {
   final List<LeadQualityItem> quality;
@@ -37,4 +52,8 @@ class LeadQualityResponse {
       summary: data['summary'] ?? {},
     );
   }
+
+  factory LeadQualityResponse.empty() =>
+      LeadQualityResponse(quality: [], summary: {});
+
 }

@@ -1,7 +1,5 @@
 import 'package:dio/dio.dart';
 import '../models/user_model.dart';
-import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
-
 
 abstract class AuthRemoteDataSource {
   Future<void> sendOtp(String email, String action);

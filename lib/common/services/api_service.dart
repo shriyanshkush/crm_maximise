@@ -1,25 +1,24 @@
 import 'package:dio/dio.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../../features/auth/services/auth_local_storage.dart'; // adjust path if needed
 
 class ApiService {
   final Dio dio;
+  final AuthLocalStorage _authStorage = AuthLocalStorage();
 
   ApiService()
       : dio = Dio(
     BaseOptions(
-      baseUrl: 'https://api.jestycrm.com',
+      baseUrl: 'https://test.api.jestycrm.com',
       headers: {'Content-Type': 'application/json'},
-      connectTimeout: const Duration(seconds: 15),
-      receiveTimeout: const Duration(seconds: 15),
+      connectTimeout: const Duration(seconds: 30),
+      receiveTimeout: const Duration(seconds: 30),
     ),
   ) {
-    // 🔹 Add interceptor to attach token + log all requests
     dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
-          // Load token from SharedPreferences
-          final prefs = await SharedPreferences.getInstance();
-          final token = prefs.getString('token');
+          // ✅ Load token from shared AuthLocalStorage
+          final token = await _authStorage.getToken();
 
           if (token != null && token.isNotEmpty) {
             options.headers['Authorization'] = 'Bearer $token';
@@ -27,7 +26,8 @@ class ApiService {
 
           print('📤 [${options.method}] ${options.uri}');
           print('🔑 Token: ${token != null ? "Attached ✅" : "Missing ❌"}');
-          print('📦 Body: ${options.data}');
+          if (options.data != null) print('📦 Body: ${options.data}');
+
           handler.next(options);
         },
         onResponse: (response, handler) {
@@ -35,12 +35,49 @@ class ApiService {
           print('📨 Response: ${response.data}');
           handler.next(response);
         },
-        onError: (e, handler) {
+        onError: (DioException e, handler) async {
           print('❌ [Error ${e.response?.statusCode}] ${e.requestOptions.uri}');
           print('📭 Details: ${e.response?.data ?? e.message}');
+
+          // ✅ Optional: handle token expiration
+          if (e.response?.statusCode == 401) {
+            final refreshed = await _tryRefreshToken();
+            if (refreshed) {
+              // Retry original request
+              final token = await _authStorage.getToken();
+              e.requestOptions.headers['Authorization'] = 'Bearer $token';
+              final cloneReq = await dio.fetch(e.requestOptions);
+              return handler.resolve(cloneReq);
+            }
+          }
+
           handler.next(e);
         },
       ),
     );
+  }
+
+  /// ✅ Optional: Auto token refresh logic
+  Future<bool> _tryRefreshToken() async {
+    try {
+      final user = await _authStorage.getUser();
+      if (user == null || user.refreshToken.isEmpty) return false;
+
+      print('🔄 Refreshing token...');
+      final response = await dio.post(
+        '/auth/api/refresh-token',
+        data: {'refreshToken': user.refreshToken},
+      );
+
+      final newToken = response.data['accessToken'];
+      if (newToken != null && newToken.isNotEmpty) {
+        await _authStorage.saveToken(newToken);
+        print('✅ Token refreshed successfully');
+        return true;
+      }
+    } catch (e) {
+      print('❌ Token refresh failed: $e');
+    }
+    return false;
   }
 }

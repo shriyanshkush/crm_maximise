@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../data/repositories/leads_repository_impl.dart';
+import '../bloc/lead_detail/lead_detail_bloc.dart';
 import '../bloc/leads_bloc.dart';
 import '../bloc/leads_event.dart';
 import '../bloc/leads_state.dart';
 import '../../models/lead_model.dart';
+import 'lead_detail_page.dart';
 
 class LeadsPage extends StatefulWidget {
   const LeadsPage({super.key});
@@ -70,6 +73,26 @@ class _LeadsPageState extends State<LeadsPage> {
     );
   }
 
+  // Widget _leadTile(LeadModel lead) {
+  //   return Card(
+  //     margin: const EdgeInsets.symmetric(vertical: 6),
+  //     child: ListTile(
+  //       leading: CircleAvatar(child: Text(lead.name.isNotEmpty ? lead.name[0].toUpperCase() : '?')),
+  //       title: Text(lead.name),
+  //       subtitle: Column(
+  //         crossAxisAlignment: CrossAxisAlignment.start,
+  //         children: [
+  //           Text(lead.email),
+  //           const SizedBox(height: 4),
+  //           Text(lead.phone),
+  //           const SizedBox(height: 4),
+  //           Row(children: [Chip(label: Text(lead.source)), const SizedBox(width: 8), Chip(label: Text(lead.status))]),
+  //         ],
+  //       ),
+  //       isThreeLine: true,
+  //     ),
+  //   );
+  // }
   Widget _leadTile(LeadModel lead) {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 6),
@@ -87,9 +110,24 @@ class _LeadsPageState extends State<LeadsPage> {
           ],
         ),
         isThreeLine: true,
+
+        // ✅ Add this:
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => BlocProvider(
+                create: (_) => LeadDetailBloc(context.read<LeadsRepositoryImpl>()),
+                child: LeadDetailPage(leadId: lead.id),
+              ),
+            ),
+          );
+        },
+
       ),
     );
   }
+
 
   @override
   Widget build(BuildContext context) {

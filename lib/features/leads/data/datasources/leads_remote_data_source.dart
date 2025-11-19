@@ -32,6 +32,12 @@ abstract class LeadsRemoteDataSource {
     String? status,
     String? source,
   });
+
+  /// ✅ New — fetch full lead details by ID
+  Future<LeadModel> getLeadById(String id);
+
+  /// ✅ New — add a note to lead
+  Future<Map<String, dynamic>> addNoteToLead(String id, String note);
 }
 
 class LeadsRemoteDataSourceImpl implements LeadsRemoteDataSource {
@@ -152,4 +158,53 @@ class LeadsRemoteDataSourceImpl implements LeadsRemoteDataSource {
       rethrow;
     }
   }
+
+  @override
+  Future<LeadModel> getLeadById(String id) async {
+    try {
+      print('📤 [lead-detail] GET /leads/api/leads/$id');
+      final res = await dio.get('/leads/api/leads/$id');
+      print('📨 [lead-detail] Response: ${res.data}');
+      return LeadModel.fromJson(res.data['data']);
+    } on DioException catch (e) {
+      print('❌ [lead-detail] DioError: ${e.response?.data ?? e.message}');
+      rethrow;
+    } catch (e) {
+      print('❌ [lead-detail] Error: $e');
+      rethrow;
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> addNoteToLead(String id, String note) async {
+    try {
+      final body = {
+        "note": note,
+        "isPrivate": false,
+      };
+
+      print('📤 [lead:addNote] POST /leads/api/leads/$id/notes body: $body');
+      final res = await dio.post('/leads/api/leads/$id/notes', data: body);
+
+      print('📨 [lead:addNote] Response: ${res.data}');
+
+      if (res.statusCode == 200 && res.data['success'] == true) {
+        return {
+          "content": res.data['data']?['note']?['content'] ?? '',
+          "createdAt": res.data['data']?['note']?['createdAt'] ?? '',
+          "isPrivate": res.data['data']?['note']?['isPrivate'] ?? false,
+        };
+      } else {
+        throw Exception('Failed to add note');
+      }
+    } on DioException catch (e) {
+      print('❌ [lead:addNote] DioError: ${e.response?.data ?? e.message}');
+      rethrow;
+    } catch (e) {
+      print('❌ [lead:addNote] Error: $e');
+      rethrow;
+    }
+  }
+
+
 }

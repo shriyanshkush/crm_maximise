@@ -16,3 +16,13 @@ class LoadDashboardEvent extends DashboardEvent {
   @override
   List<Object?> get props => [organizationId, view];
 }
+
+class LoadRevenueGrowthEvent extends DashboardEvent {
+  final String orgId;
+  final String period; // weekly, monthly, yearly
+
+  const LoadRevenueGrowthEvent(this.orgId, {this.period = "weekly"});
+
+  @override
+  List<Object?> get props => [orgId, period];
+}
